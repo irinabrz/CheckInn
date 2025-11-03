@@ -170,12 +170,6 @@ private:
     string nume;
     string adresa;
     vector<Camera> camere;
-    int getCameraIndexByNumber(int numar) const {
-        for (size_t i = 0; i < camere.size(); ++i) {
-            if (camere[i].getNumar() == numar) return (int)i;
-        }
-        return -1;
-    }
 public:
 
     explicit Hotel(const string& n = "", const string& a = "")
@@ -207,7 +201,12 @@ public:
     const std::vector<Camera>& getCamere() const { return camere; }
 
 
-
+    Camera* getCameraByNumber(int numar) {
+        for (auto& cam : camere) {
+            if (cam.getNumar() == numar) return &cam;
+        }
+        return nullptr;
+    }
     void adaugaCamera(const Camera& c) { camere.push_back(c); }
 
     bool rezervaCamera(int paturi, const Client& c) {
@@ -483,6 +482,13 @@ int main() {
 
     cout << "\n=== Iterare si afisare finale dupa modificari camere ===\n";
     for (const auto& cam : h.getCamere()) cout << cam.detaliiCamera() << endl;
+    cout << "\n=== Testare getHotel prin manager ===\n";
+    Hotel& hotelRef = manager.getHotel();
+    cout << hotelRef << endl;
+    cout << "\n=== Testare iterare camere prin getHotel ===\n";
+    for (auto& cam : hotelRef.getCamere()) {
+        cout << cam.detaliiCamera() << endl;
+    }
 
 
     return 0;

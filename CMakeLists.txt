@@ -1,10 +1,15 @@
+cmake_minimum_required(VERSION 3.25)
+project(CheckInn)
 cmake_minimum_required(VERSION 3.26)
 
+set(CMAKE_CXX_STANDARD 17)
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing executable name in this file
 # for now, the project name is used as the executable name
 set(MAIN_PROJECT_NAME "oop")
 set(MAIN_EXECUTABLE_NAME "${MAIN_PROJECT_NAME}")
 
+add_executable(CheckInn main.cpp)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/artifacts/bin")
 
 project(${MAIN_PROJECT_NAME})
 # set(CMAKE_PROJECT_VERSION_MAJOR 0)
@@ -46,7 +51,7 @@ include(cmake/CopyHelper.cmake)
 # find_package(Threads REQUIRED)
 
 ###############################################################################
-set(MAIN_EXECUTABLE_NAME "CheckInn")
+
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
 add_executable(${MAIN_EXECUTABLE_NAME}
         main.cpp

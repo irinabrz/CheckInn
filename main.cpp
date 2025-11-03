@@ -273,6 +273,11 @@ int main() {
     Rezervare r(cam, c, "2025-11-03");
     cout << r.verificaData("2025-11-03") << endl;
     r.afisareDetalii();
+    Client c4("Popescu", "Ion", "0788888888");
+    if (c1.compara(c4))
+        cout << "Clientii " << c1 << " si " << c4 << " au aceeasi identitate (nume si prenume).\n";
+    else
+        cout << "Clientii sunt diferiti.\n";
 
     return 0;
 }

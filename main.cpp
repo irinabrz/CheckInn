@@ -159,7 +159,8 @@ public:
     bool verificaData(const string& d) const { return data == d; }
     const Client& getClient() const { return client; }
     int getNumarCamera() const { return camera.getNumar(); }
-    string getData() const { return data; }
+    const string& getData() const { return data; }
+
 };
 
 //---------------------------------------------
@@ -382,7 +383,7 @@ int main() {
     cout << "r2 data corecta? " << (r2.verificaData("2025-11-05") ? "Da" : "Nu") << endl;
 
     cout << "\nIterare si afisare detalii camere:\n";
-    for (auto& cam : h.getCamere()) {
+    for (const auto& cam : h.getCamere()) {
         cout << cam << endl;
         if (!cam.esteDisponibila()) {
             cout << "  Camera ocupata, paturi: " << cam.getNumarPaturi() << endl;
@@ -391,7 +392,7 @@ int main() {
         }
     }
     cout << "\nIterare si afisare detalii camere:\n";
-    for (auto& cam : h.getCamere()) {
+    for (const auto& cam : h.getCamere()) {
         cout << cam << endl;
         if (!cam.esteDisponibila()) {
             cout << "  Camera ocupata, paturi: " << cam.getNumarPaturi() << endl;
@@ -404,7 +405,7 @@ int main() {
     if (!h.rezervaCamera(3, c5)) cout << "Nu exista camera libera pentru 3 paturi, clientul c5 nu poate rezerva\n";
 
     cout << "\nRezervari si eliberari in bucla:\n";
-    for (auto& cam : h.getCamere()) {
+    for ( auto& cam : h.getCamere()) {
         if (cam.esteDisponibila()) {
             cam.rezerva(c5);
             cout << "Rezervare automata camera " << cam.getNumar() << " pentru c5\n";
@@ -422,7 +423,7 @@ int main() {
     cout << "\nAfisare finala clienti si camere:\n";
     cout << c1 << "\n" << c2 << "\n" << c3 << "\n" << c4 << "\n" << c5 << endl;
     for (int i = 0; i < 2; i++) {
-        for (auto& cam : h.getCamere()) {
+        for ( auto& cam : h.getCamere()) {
             if (cam.esteDisponibila()) {
                 cam.rezerva(c1);
                 cout << "Rezervare " << i+1 << " camera " << cam.getNumar() << " pentru c1\n";
@@ -491,14 +492,12 @@ int main() {
     }
     cout << "\n=== Testare getCameraByNumber ===\n";
     int cautaNumar = 203;
-    Camera* camPtr = h.getCameraByNumber(cautaNumar);
+    const Camera* camPtr = h.getCameraByNumber(cautaNumar);
     if (camPtr) {
         cout << "Camera gasita: " << camPtr->detaliiCamera() << endl;
     } else {
         cout << "Camera " << cautaNumar << " nu exista!\n";
     }
-
-
 
     return 0;
 }

@@ -456,6 +456,34 @@ int main() {
     cout << c3.getNumeComplet() << (manager.areRezervare(c3) ? " are rezervare.\n" : " nu are rezervare.\n");
 
     manager.afiseazaCamereLibere();
+    cout << "\n=== Testare functii Client nefolosite ===\n";
+    cout << c1.getNumeComplet() << " are telefon valid? " << (c1.telefonValid() ? "Da" : "Nu") << endl;
+    cout << "Cheia clientului c2: " << c2.key() << endl;
+
+    cout << "\n=== Testare functii Camera nefolosite ===\n";
+    for (const auto& cam : h.getCamere()) {
+        cout << "Camera " << cam.getNumar()
+             << " este la etaj " << cam.getEtaj()
+             << ", are " << cam.getNumarPaturi() << " paturi"
+             << (cam.esteDisponibila() ? " si este libera" : " si este ocupata")
+             << endl;
+    }
+
+    cout << "\n=== Testare functii Rezervare nefolosite ===\n";
+    cout << "Data rezervarii r1: " << r1.getData() << endl;
+    cout << "Client rezervare r2: " << r2.getClient() << endl;
+    cout << "Numar camera rezervare r2: " << r2.getNumarCamera() << endl;
+
+    cout << "\n=== Testare getCamere non-const ===\n";
+    vector<Camera>& camereRef = h.getCamere();
+    for (auto& cam : camereRef) {
+        if (cam.esteDisponibila()) cam.rezerva(c5);
+        else cam.elibereaza();
+    }
+
+    cout << "\n=== Iterare si afisare finale dupa modificari camere ===\n";
+    for (const auto& cam : h.getCamere()) cout << cam.detaliiCamera() << endl;
+
 
     return 0;
 }

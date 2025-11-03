@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
+#include <algorithm>
 using namespace std;
 
 //---------------------------------------------
@@ -37,12 +38,14 @@ public:
         return out;
     }
     bool telefonValid() const {
-        for (char c : telefon) if (!isdigit(c)) return false;
+        for (char ch : telefon) if (!isdigit((unsigned char)ch)) return false;
         return !telefon.empty();
     }
+
     void schimbaTelefon(const string& t) { telefon = t; }
     string getNumeComplet() const { return nume + " " + prenume; }
     bool compara(const Client& c) const { return nume == c.nume && prenume == c.prenume; }
+    string key() const { return nume + "|" + prenume; }
 };
 
 //---------------------------------------------
@@ -154,6 +157,9 @@ public:
     void afisareDetalii() const { cout << *this << endl; }
 
     bool verificaData(const string& d) const { return data == d; }
+    const Client& getClient() const { return client; }
+    int getNumarCamera() const { return camera.getNumar(); }
+    string getData() const { return data; }
 };
 
 //---------------------------------------------
@@ -164,7 +170,12 @@ private:
     string nume;
     string adresa;
     vector<Camera> camere;
-
+    int getCameraIndexByNumber(int numar) const {
+        for (size_t i = 0; i < camere.size(); ++i) {
+            if (camere[i].getNumar() == numar) return (int)i;
+        }
+        return -1;
+    }
 public:
 
     explicit Hotel(const string& n = "", const string& a = "")
@@ -192,10 +203,9 @@ public:
             out << "  " << c << "\n";
         return out;
     }
-    std::vector<Camera>& getCamere() {
-        return camere;
-    }
-    int numarCamere() const { return camere.size(); }
+    std::vector<Camera>& getCamere() { return camere; }
+    const std::vector<Camera>& getCamere() const { return camere; }
+
 
 
     void adaugaCamera(const Camera& c) { camere.push_back(c); }
@@ -241,7 +251,76 @@ public:
         return total;
     }
 };
+class HotelManager {
+private:
+    Hotel hotel;
+    vector<Rezervare> rezervari;
 
+public:
+    explicit HotelManager(const Hotel& h) : hotel(h) {}
+
+    Hotel& getHotel() { return hotel; }
+    bool adaugaRezervareAutomata(const Client& c, int paturiNecesare, const string& data) {
+        for (auto& cam : hotel.getCamere()) {
+            if (cam.esteDisponibila() && cam.getNumarPaturi() >= paturiNecesare) {
+                cam.rezerva(c);
+                rezervari.emplace_back(cam, c, data);
+                cout << "Rezervare automata realizata pentru " << c << " in camera " << cam.getNumar() << endl;
+                return true;
+            }
+        }
+        cout << "Nu exista camera disponibila pentru " << c << endl;
+        return false;
+    }
+
+    bool rezervaCameraDirect(int numar, const Client& c, const string& data) {
+        for (auto& cam : hotel.getCamere()) {
+            if (cam.getNumar() == numar && cam.esteDisponibila()) {
+                cam.rezerva(c);
+                rezervari.emplace_back(cam, c, data);
+                cout << "Rezervare directa realizata pentru " << c << " in camera " << numar << endl;
+                return true;
+            }
+        }
+        cout << "Camera " << numar << " nu este disponibila!\n";
+        return false;
+    }
+    bool elibereazaCamera(int numar) {
+        bool ok = hotel.elibereazaCamera(numar);
+        if (ok) cout << "Camera " << numar << " a fost eliberata prin manager.\n";
+        else cout << "Camera " << numar << " nu era ocupata.\n";
+        return ok;
+    }
+    void stergeRezervare(int numarCamera) {
+        rezervari.erase(remove_if(rezervari.begin(), rezervari.end(), [numarCamera](const Rezervare& r) {
+            return r.getNumarCamera() == numarCamera;
+        }), rezervari.end());
+        cout << "Rezervarea pentru camera " << numarCamera << " a fost stearsa.\n";
+    }
+
+    void afiseazaRezervari() const {
+        cout << "\n--- Lista rezervari ---\n";
+        if (rezervari.empty()) cout << "Nu exista rezervari.\n";
+        for (const auto& r : rezervari) r.afisareDetalii();
+    }
+    bool areRezervare(const Client& c) const {
+        for (const auto& r : rezervari) {
+            if (r.getClient().compara(c)) return true;
+        }
+        return false;
+    }
+    void afiseazaCamereLibere() const {
+        cout << "\nCamere libere in hotel:\n";
+        for (const auto& cam : hotel.getCamere()) {
+            if (cam.esteDisponibila()) cout << "  " << cam.detaliiCamera() << endl;
+        }
+    }
+
+    void raportRezervari() const {
+        cout << "\n--- Raport rezervari ---\n";
+        cout << "Total rezervari: " << rezervari.size() << endl;
+    }
+};
 //---------------------------------------------
 // Main: scenariu de utilizare
 //---------------------------------------------
@@ -326,7 +405,7 @@ int main() {
     if (!h.rezervaCamera(3, c5)) cout << "Nu exista camera libera pentru 3 paturi, clientul c5 nu poate rezerva\n";
 
     cout << "\nRezervari si eliberari in bucla:\n";
-    for (auto& cam : h.getCamere()) { // FIX: auto& pentru modificare
+    for (auto& cam : h.getCamere()) {
         if (cam.esteDisponibila()) {
             cam.rezerva(c5);
             cout << "Rezervare automata camera " << cam.getNumar() << " pentru c5\n";
@@ -359,6 +438,24 @@ int main() {
     for (const auto& cam : h.getCamere()) {
         cout << cam.detaliiCamera() << endl;
     }
+    cout << "\n=== Testare HotelManager ===\n";
+    HotelManager manager(h);
+
+    manager.afiseazaCamereLibere();
+    manager.rezervaCameraDirect(101, c1, "2025-11-10");
+    manager.rezervaCameraDirect(202, c2, "2025-11-11");
+    manager.adaugaRezervareAutomata(c3, 2, "2025-11-15");
+    manager.afiseazaRezervari();
+
+    manager.elibereazaCamera(101);
+    manager.stergeRezervare(101);
+    manager.raportRezervari();
+
+    cout << "\nVerificare rezervari clienti:\n";
+    cout << c1.getNumeComplet() << (manager.areRezervare(c1) ? " are rezervare.\n" : " nu are rezervare.\n");
+    cout << c3.getNumeComplet() << (manager.areRezervare(c3) ? " are rezervare.\n" : " nu are rezervare.\n");
+
+    manager.afiseazaCamereLibere();
 
     return 0;
 }

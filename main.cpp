@@ -36,7 +36,10 @@ public:
         out << c.nume << " " << c.prenume << " (" << c.telefon << ")";
         return out;
     }
-
+    bool telefonValid() const {
+        for (char c : telefon) if (!isdigit(c)) return false;
+        return !telefon.empty();
+    }
     void schimbaTelefon(const string& t) { telefon = t; }
     string getNumeComplet() const { return nume + " " + prenume; }
     bool compara(const Client& c) const { return nume == c.nume && prenume == c.prenume; }
@@ -85,7 +88,7 @@ public:
 
     bool esteDisponibila() const { return !ocupata; }
 
-    bool rezerva(const Client& c) {
+    bool rezerva(const Client& c){
         if (!ocupata) {
             client = c;
             ocupata = true;
@@ -101,6 +104,11 @@ public:
             return true;
         }
         return false;
+    }
+
+    string detaliiCamera() const {
+        return "Camera " + to_string(numar) + ", etaj " + to_string(etaj) +
+               ", paturi: " + to_string(paturi) + (ocupata ? " (ocupata)" : " (libera)");
     }
 
     int getNumarPaturi() const { return paturi; }
@@ -184,6 +192,11 @@ public:
             out << "  " << c << "\n";
         return out;
     }
+    std::vector<Camera>& getCamere() {
+        return camere;
+    }
+    int numarCamere() const { return camere.size(); }
+
 
     void adaugaCamera(const Camera& c) { camere.push_back(c); }
 
@@ -236,48 +249,116 @@ int main() {
     Client c1("Popescu", "Ion", "0712345678");
     Client c2("Ionescu", "Maria", "0723456789");
     Client c3("Georgescu", "Andrei", "0734567890");
+    Client c4("Vasilescu", "Elena", "0745678901");
+    Client c5("Marin", "Alex", "0756789012");
 
     Camera cam1(101, 1, 2);
     Camera cam2(102, 1, 3);
     Camera cam3(201, 2, 2);
     Camera cam4(202, 2, 1);
+    Camera cam5(203, 2, 4);
 
     Hotel h("Hotel Central", "Str. Libertatii 10");
     h.adaugaCamera(cam1);
     h.adaugaCamera(cam2);
     h.adaugaCamera(cam3);
     h.adaugaCamera(cam4);
-
+    h.adaugaCamera(cam5);
+    cout << "Status hotel initial:\n";
     cout << h << endl;
 
     h.rezervaCamera(2, c1);
     h.rezervaCamera(1, c2);
-    h.rezervaCamera(3, c3); // va rezerva camera cu 3 paturi
-
+    h.rezervaCamera(3, c3);
+    h.rezervaCamera(4, c4);
+    h.rezervaCamera(1, c5);
     cout << "\nDupa rezervari:\n";
     cout << h << endl;
-
     h.raportCamere();
     cout << "Numar total paturi libere: " << h.numarPaturiLibere() << endl;
 
-    h.elibereazaCamera(101);
-    cout << "\nDupa eliberarea camerei 101:\n";
-    cout << h << endl;///test
-    Client c("Ion", "Popescu", "0712345678");
-    cout << c.getNumeComplet() << endl;
-    c.schimbaTelefon("0799999998");
+    cout << "\nVerificare comparare clienti:\n";
+    if (c1.compara(c2)) cout << "c1 si c2 sunt aceeasi persoana\n";
+    else cout << "c1 si c2 sunt diferiti\n";
 
-    Camera cam(101, 1, 2);
-    cout << cam.getEtaj() << endl;
+    if (c4.compara(c4)) cout << "c4 si c4 sunt aceeasi persoana\n";
 
-    Rezervare r(cam, c, "2025-11-03");
-    cout << r.verificaData("2025-11-03") << endl;
-    r.afisareDetalii();
-    Client c4("Popescu", "Ion", "0788888888");
-    if (c1.compara(c4))
-        cout << "Clientii " << c1 << " si " << c4 << " au aceeasi identitate (nume si prenume).\n";
-    else
-        cout << "Clientii sunt diferiti.\n";
+    cout << "\nSchimbare telefoane clienti:\n";
+    c1.schimbaTelefon("0799999999");
+    c2.schimbaTelefon("0788888888");
+    cout << c1 << endl;
+    cout << c2 << endl;
+
+    cout << "\nEliberare camere 101 si 202:\n";
+    if (h.elibereazaCamera(101)) cout << "Camera 101 eliberata\n";
+    if (h.elibereazaCamera(202)) cout << "Camera 202 eliberata\n";
+    cout << h << endl;
+
+    Rezervare r1(cam3, c3, "2025-11-05");
+    Rezervare r2(cam5, c4, "2025-12-01");
+    r1.afisareDetalii();
+    r2.afisareDetalii();
+
+    cout << "\nVerificare date rezervari:\n";
+    cout << "r1 data corecta? " << (r1.verificaData("2025-11-05") ? "Da" : "Nu") << endl;
+    cout << "r2 data corecta? " << (r2.verificaData("2025-11-05") ? "Da" : "Nu") << endl;
+
+    cout << "\nIterare si afisare detalii camere:\n";
+    for (auto& cam : h.getCamere()) {
+        cout << cam << endl;
+        if (!cam.esteDisponibila()) {
+            cout << "  Camera ocupata, paturi: " << cam.getNumarPaturi() << endl;
+        } else {
+            cout << "  Camera libera, paturi: " << cam.getNumarPaturi() << endl;
+        }
+    }
+    cout << "\nIterare si afisare detalii camere:\n";
+    for (auto& cam : h.getCamere()) {
+        cout << cam << endl;
+        if (!cam.esteDisponibila()) {
+            cout << "  Camera ocupata, paturi: " << cam.getNumarPaturi() << endl;
+        } else {
+            cout << "  Camera libera, paturi: " << cam.getNumarPaturi() << endl;
+        }
+    }
+
+    cout << "\nTest rezervare suplimentara pentru camere ocupate:\n";
+    if (!h.rezervaCamera(3, c5)) cout << "Nu exista camera libera pentru 3 paturi, clientul c5 nu poate rezerva\n";
+
+    cout << "\nRezervari si eliberari in bucla:\n";
+    for (auto& cam : h.getCamere()) { // FIX: auto& pentru modificare
+        if (cam.esteDisponibila()) {
+            cam.rezerva(c5);
+            cout << "Rezervare automata camera " << cam.getNumar() << " pentru c5\n";
+        } else {
+            cam.elibereaza();
+            cout << "Eliberare automata camera " << cam.getNumar() << "\n";
+        }
+    }
+
+    cout << "\nTest rezervare suplimentara pentru camere ocupate:\n";
+    if (!h.rezervaCamera(3, c5)) cout << "Nu exista camera libera pentru 3 paturi, clientul c5 nu poate rezerva\n";
+
+    cout << "\nStare finala hotel:\n";
+    cout << h << endl;
+    cout << "\nAfisare finala clienti si camere:\n";
+    cout << c1 << "\n" << c2 << "\n" << c3 << "\n" << c4 << "\n" << c5 << endl;
+    for (int i = 0; i < 2; i++) {
+        for (auto& cam : h.getCamere()) {
+            if (cam.esteDisponibila()) {
+                cam.rezerva(c1);
+                cout << "Rezervare " << i+1 << " camera " << cam.getNumar() << " pentru c1\n";
+            } else {
+                cam.elibereaza();
+                cout << "Eliberare " << i+1 << " camera " << cam.getNumar() << "\n";
+            }
+        }
+    }
+
+    cout << "\n=== Afisare camere dupa teste suplimentare ===\n";
+    for (const auto& cam : h.getCamere()) {
+        cout << cam.detaliiCamera() << endl;
+    }
 
     return 0;
 }

@@ -15,7 +15,7 @@ private:
 
 public:
 
-    Client(const string& n = "", const string& p = "", const string& t = "")
+    explicit Client(const string& n = "", const string& p = "", const string& t = "")
         : nume(n), prenume(p), telefon(t) {}
     Client(const Client& c)
         : nume(c.nume), prenume(c.prenume), telefon(c.telefon) {}
@@ -55,7 +55,7 @@ private:
 
 public:
 
-    Camera(int nr = 0, int e = 0, int p = 1)
+    explicit Camera(int nr = 0, int e = 0, int p = 1)
         : numar(nr), etaj(e), paturi(p), ocupata(false) {}
 
     Camera(const Camera& c)
@@ -118,7 +118,7 @@ private:
     string data;
 
 public:
-    Rezervare(const Camera& cam = Camera(), const Client& c = Client(), const string& d = "")
+    explicit Rezervare(const Camera& cam = Camera(), const Client& c = Client(), const string& d = "")
         : camera(cam), client(c), data(d) {}
 
     Rezervare(const Rezervare& r)
@@ -159,7 +159,7 @@ private:
 
 public:
 
-    Hotel(const string& n = "", const string& a = "")
+    explicit Hotel(const string& n = "", const string& a = "")
         : nume(n), adresa(a) {}
 
 
@@ -263,6 +263,16 @@ int main() {
     h.elibereazaCamera(101);
     cout << "\nDupa eliberarea camerei 101:\n";
     cout << h << endl;///test
+    Client c("Ion", "Popescu", "0712345678");
+    cout << c.getNumeComplet() << endl;
+    c.schimbaTelefon("0799999998");
+
+    Camera cam(101, 1, 2);
+    cout << cam.getEtaj() << endl;
+
+    Rezervare r(cam, c, "2025-11-03");
+    cout << r.verificaData("2025-11-03") << endl;
+    r.afisareDetalii();
 
     return 0;
 }

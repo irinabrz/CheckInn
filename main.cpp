@@ -489,6 +489,15 @@ int main() {
     for (auto& cam : hotelRef.getCamere()) {
         cout << cam.detaliiCamera() << endl;
     }
+    cout << "\n=== Testare getCameraByNumber ===\n";
+    int cautaNumar = 203;
+    Camera* camPtr = h.getCameraByNumber(cautaNumar);
+    if (camPtr) {
+        cout << "Camera gasita: " << camPtr->detaliiCamera() << endl;
+    } else {
+        cout << "Camera " << cautaNumar << " nu exista!\n";
+    }
+
 
 
     return 0;

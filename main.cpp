@@ -262,7 +262,7 @@ int main() {
 
     h.elibereazaCamera(101);
     cout << "\nDupa eliberarea camerei 101:\n";
-    cout << h << endl;
+    cout << h << endl;///test
 
     return 0;
 }
